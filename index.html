@@ -5,6 +5,8 @@
     <style>
         body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
         .stock-card { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .positive { color: green; }
+        .negative { color: red; }
     </style>
 </head>
 <body>
@@ -14,14 +16,13 @@
 
     <script>
         const stocks = new Set();
-        
+        const API_KEY = 'cokrjr1r01qvovniq3q0cokrjr1r01qvovniq3qg'; // Free Finnhub API key
+
         async function fetchStockData(symbol) {
-            const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-            const apiKey = 'YOUR_ALPHA_VANTAGE_API_KEY';
             try {
-                const response = await fetch(`${corsProxy}https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=636I91WBMHPP25K4{apiKey}`);
+                const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
                 const data = await response.json();
-                return data['Global Quote'];
+                return data;
             } catch (error) {
                 console.error('Error:', error);
                 return null;
@@ -29,16 +30,18 @@
         }
 
         function createStockCard(symbol, data) {
-            if (!data) return `<div class="stock-card">${symbol}: Error loading data</div>`;
+            if (!data || data.c === 0) return `<div class="stock-card">${symbol}: Error loading data</div>`;
             
-            const price = parseFloat(data['05. price']);
-            const change = parseFloat(data['09. change']);
+            const changeClass = data.d >= 0 ? 'positive' : 'negative';
             
             return `
                 <div class="stock-card">
                     <strong>${symbol}</strong>: 
-                    $${price.toFixed(2)} 
-                    (${change >= 0 ? '+' : ''}${change.toFixed(2)})
+                    $${data.c.toFixed(2)} 
+                    <span class="${changeClass}">
+                        (${data.d >= 0 ? '+' : ''}${data.d.toFixed(2)} | 
+                        ${data.dp >= 0 ? '+' : ''}${data.dp.toFixed(2)}%)
+                    </span>
                 </div>
             `;
         }
@@ -61,6 +64,9 @@
             }
         }
 
+        // Initial update
+        updateStocks();
+        // Update every minute
         setInterval(updateStocks, 60000);
     </script>
 </body>
