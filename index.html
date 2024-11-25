@@ -19,7 +19,7 @@
             const corsProxy = 'https://cors-anywhere.herokuapp.com/';
             const apiKey = 'YOUR_ALPHA_VANTAGE_API_KEY';
             try {
-                const response = await fetch(`${corsProxy}https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`);
+                const response = await fetch(`${corsProxy}https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=636I91WBMHPP25K4{apiKey}`);
                 const data = await response.json();
                 return data['Global Quote'];
             } catch (error) {
