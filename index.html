@@ -16,13 +16,17 @@
 
     <script>
         const stocks = new Set();
-        const API_KEY = 'cokrjr1r01qvovniq3q0cokrjr1r01qvovniq3qg'; // Free Finnhub API key
 
         async function fetchStockData(symbol) {
             try {
-                const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`);
+                const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`);
                 const data = await response.json();
-                return data;
+                const quote = data.chart.result[0].meta;
+                return {
+                    price: quote.regularMarketPrice,
+                    change: quote.regularMarketChange,
+                    changePercent: quote.regularMarketChangePercent
+                };
             } catch (error) {
                 console.error('Error:', error);
                 return null;
@@ -30,17 +34,17 @@
         }
 
         function createStockCard(symbol, data) {
-            if (!data || data.c === 0) return `<div class="stock-card">${symbol}: Error loading data</div>`;
+            if (!data) return `<div class="stock-card">${symbol}: Error loading data</div>`;
             
-            const changeClass = data.d >= 0 ? 'positive' : 'negative';
+            const changeClass = data.change >= 0 ? 'positive' : 'negative';
             
             return `
                 <div class="stock-card">
                     <strong>${symbol}</strong>: 
-                    $${data.c.toFixed(2)} 
+                    $${data.price.toFixed(2)} 
                     <span class="${changeClass}">
-                        (${data.d >= 0 ? '+' : ''}${data.d.toFixed(2)} | 
-                        ${data.dp >= 0 ? '+' : ''}${data.dp.toFixed(2)}%)
+                        (${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)} | 
+                        ${data.changePercent >= 0 ? '+' : ''}${(data.changePercent * 100).toFixed(2)}%)
                     </span>
                 </div>
             `;
@@ -64,9 +68,7 @@
             }
         }
 
-        // Initial update
         updateStocks();
-        // Update every minute
         setInterval(updateStocks, 60000);
     </script>
 </body>
